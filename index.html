@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jawk Games</title>
+<meta name="description" content="Jawk — Cemre Başoğlu'nun bağımsız oyun stüdyosu. Nostaljik arcade oyunları ve eğitim uygulamaları.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23ff4d6d'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle' font-family='monospace' font-weight='900' fill='white'%3EJ%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #0c0f1d; --bg2: #141a30; --card: #182040; --line: rgba(255,255,255,.1);
+    --text: #eef1ff; --muted: #a3abcc; --pink: #ff4d6d; --yellow: #ffd23f; --cyan: #3de0ff; --green: #3ddc84;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; font-family: "Nunito", system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
+  a { color: inherit; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+  /* Üst menü */
+  header { position: sticky; top: 0; z-index: 10; background: rgba(12,15,29,.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  header .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 12px; }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo b { font-family: "Press Start 2P", monospace; font-size: 18px; letter-spacing: 1px; }
+  .logo i { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; font-style: normal;
+    font-family: "Press Start 2P", monospace; font-size: 14px; background: var(--pink); box-shadow: 0 4px 0 #b3223f; }
+  nav { display: flex; gap: 6px; align-items: center; }
+  nav a { text-decoration: none; color: var(--muted); font-weight: 700; padding: 8px 10px; border-radius: 8px; font-size: 15px; }
+  nav a:hover { color: var(--text); background: rgba(255,255,255,.06); }
+  .lang { border: 1px solid var(--line); background: none; color: var(--text); font: inherit; font-weight: 800; font-size: 13px; padding: 6px 10px; border-radius: 8px; cursor: pointer; }
+
+  /* Giriş */
+  .hero { position: relative; overflow: hidden; padding: 90px 0 80px; text-align: center; }
+  .hero::before { content: ""; position: absolute; inset: 0; z-index: -1;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,77,109,.25), transparent 60%),
+                radial-gradient(ellipse at 15% 80%, rgba(61,224,255,.15), transparent 50%),
+                linear-gradient(transparent 0 calc(100% - 1px), rgba(255,255,255,.05) 0) 0 0 / 100% 32px,
+                linear-gradient(90deg, transparent 0 calc(100% - 1px), rgba(255,255,255,.05) 0) 0 0 / 32px 100%; }
+  .hero h1 { font-family: "Press Start 2P", monospace; font-size: clamp(30px, 7vw, 64px); margin: 0 0 18px; line-height: 1.2;
+    color: var(--yellow); text-shadow: 4px 4px 0 var(--pink), 8px 8px 0 rgba(0,0,0,.4); }
+  .hero p { font-size: clamp(17px, 2.3vw, 21px); color: var(--muted); max-width: 640px; margin: 0 auto 30px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 900; padding: 13px 22px; border-radius: 12px;
+    background: var(--pink); color: #fff; box-shadow: 0 5px 0 #b3223f; transition: transform .1s, box-shadow .1s; }
+  .btn:hover { transform: translateY(2px); box-shadow: 0 3px 0 #b3223f; }
+  .btn.alt { background: var(--card); box-shadow: 0 5px 0 #0a0d1c; border: 1px solid var(--line); }
+  .stats { display: flex; justify-content: center; gap: 28px; flex-wrap: wrap; margin-top: 40px; }
+  .stats div { text-align: center; }
+  .stats b { display: block; font-family: "Press Start 2P", monospace; font-size: 20px; color: var(--cyan); margin-bottom: 8px; }
+  .stats span { color: var(--muted); font-size: 14px; }
+
+  section { padding: 70px 0; }
+  h2 { font-family: "Press Start 2P", monospace; font-size: clamp(18px, 3vw, 26px); margin: 0 0 10px; }
+  .sub { color: var(--muted); margin: 0 0 32px; }
+
+  /* Oyun kartları */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 12px;
+    transition: transform .2s, border-color .2s; }
+  .card:hover { transform: translateY(-4px); border-color: rgba(255,210,63,.5); }
+  .card .ic { width: 84px; height: 84px; border-radius: 20px; overflow: hidden; display: grid; place-items: center; box-shadow: 0 6px 16px rgba(0,0,0,.4);
+    font-family: "Press Start 2P", monospace; font-size: 22px; color: #fff; }
+  .card .ic img { width: 100%; height: 100%; object-fit: cover; }
+  .card h3 { margin: 0; font-size: 19px; font-weight: 900; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; flex: 1; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { font-size: 12px; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: rgba(255,255,255,.07); color: var(--muted); }
+  .tag.star { color: var(--yellow); }
+  .play { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; text-decoration: none; font-weight: 800; font-size: 14px;
+    padding: 9px 14px; border-radius: 10px; background: #000; border: 1px solid rgba(255,255,255,.25); }
+  .play:hover { border-color: var(--green); }
+  .play svg { width: 18px; height: 18px; }
+
+  /* Hakkında / iletişim */
+  .about { display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; align-items: start; }
+  .box { background: var(--bg2); border: 1px solid var(--line); border-radius: 18px; padding: 24px; }
+  .box p { color: var(--muted); margin: 0 0 12px; }
+  .contact a { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 800; padding: 12px 14px; border-radius: 12px;
+    background: rgba(255,255,255,.05); margin-bottom: 10px; word-break: break-all; }
+  .contact a:hover { background: rgba(255,255,255,.1); }
+
+  footer { border-top: 1px solid var(--line); padding: 28px 0 40px; color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  footer a { text-decoration: none; margin-left: 16px; }
+  footer a:hover { color: var(--text); }
+
+  @media (max-width: 720px) {
+    nav a.hide-m { display: none; }
+    .about { grid-template-columns: 1fr; }
+    .hero { padding: 60px 0 56px; }
+    footer a { margin: 0 16px 0 0; }
+  }
+  [data-en] { display: none; }
+  html[lang="en"] [data-tr] { display: none; }
+  html[lang="en"] [data-en] { display: revert; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a class="logo" href="#"><i>J</i><b>JAWK</b></a>
+    <nav>
+      <a class="hide-m" href="#oyunlar"><span data-tr>Oyunlar</span><span data-en>Games</span></a>
+      <a class="hide-m" href="#hakkinda"><span data-tr>Hakkında</span><span data-en>About</span></a>
+      <a href="#iletisim"><span data-tr>İletişim</span><span data-en>Contact</span></a>
+      <button class="lang" id="lang">EN</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="wrap">
+      <h1>JAWK GAMES</h1>
+      <p data-tr>Nostaljik arcade ruhunu bugünün telefonlarına taşıyan bağımsız bir oyun stüdyosu. Basit, eğlenceli, herkes için.</p>
+      <p data-en>An indie game studio bringing the nostalgic arcade spirit to today's phones. Simple, fun, for everyone.</p>
+      <a class="btn" href="#oyunlar">🎮 <span data-tr>Oyunlarımız</span><span data-en>Our Games</span></a>
+      <a class="btn alt" href="https://play.google.com/store/apps/dev?id=7243009793713051790" target="_blank" rel="noopener">▶ Google Play</a>
+      <div class="stats">
+        <div><b>100K+</b><span data-tr>indirme</span><span data-en>downloads</span></div>
+        <div><b>4.2★</b><span data-tr>ortalama puan</span><span data-en>average rating</span></div>
+        <div><b>5</b><span data-tr>proje</span><span data-en>projects</span></div>
+      </div>
+    </div>
+  </div>
+
+  <section id="oyunlar">
+    <div class="wrap">
+      <h2><span data-tr>Oyunlar</span><span data-en>Games</span></h2>
+      <p class="sub" data-tr>Google Play'deki oyunlarımız.</p>
+      <p class="sub" data-en>Our games on Google Play.</p>
+      <div class="grid">
+        <article class="card">
+          <div class="ic"><img src="https://play-lh.googleusercontent.com/Q4acaAVwbVMpuDQFp33gnmfHEWaJuaw3TRgK0tJLolimiELSlmCb8wIGFmPkTI148y250z2p6GpuDsuZ1UUY=s256" alt="Popeye" loading="lazy" onerror="this.parentNode.style.background='linear-gradient(135deg,#ffd23f,#ff8a3d)';this.replaceWith('PY')"></div>
+          <h3>Popeye</h3>
+          <p data-tr>Klasik oyunun nostaljik bir yeniden uyarlaması.</p>
+          <p data-en>A nostalgic re-adaptation of the classic game.</p>
+          <div class="tags"><span class="tag star">★ 4.2</span><span class="tag">100K+</span><span class="tag">Arcade</span></div>
+          <a class="play" href="https://play.google.com/store/apps/details?id=air.popeye" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path fill="#3ddc84" d="M4 2.5v19c0 .6.6 1 1.1.7L22 12.9c.5-.3.5-1.1 0-1.4L5.1 1.8C4.6 1.5 4 1.9 4 2.5z"/></svg> Google Play</a>
+        </article>
+        <article class="card">
+          <div class="ic" style="background:linear-gradient(135deg,#ff8a3d,#ff4d6d)">PT</div>
+          <h3>Popeye Tales Atari</h3>
+          <p data-tr>Atari tarzı retro bir macera.</p>
+          <p data-en>A retro adventure in Atari style.</p>
+          <div class="tags"><span class="tag">Retro</span><span class="tag">Arcade</span></div>
+          <a class="play" href="https://play.google.com/store/apps/details?id=com.air.popeyetales" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path fill="#3ddc84" d="M4 2.5v19c0 .6.6 1 1.1.7L22 12.9c.5-.3.5-1.1 0-1.4L5.1 1.8C4.6 1.5 4 1.9 4 2.5z"/></svg> Google Play</a>
+        </article>
+        <article class="card">
+          <div class="ic" style="background:linear-gradient(135deg,#3de0ff,#5b6cff)">MJ</div>
+          <h3>Mappy Atari Jump</h3>
+          <p data-tr>Zıpla, kaç, puanları topla: Atari ruhunda bir platform oyunu.</p>
+          <p data-en>Jump, dodge, collect: a platformer in Atari spirit.</p>
+          <div class="tags"><span class="tag">Retro</span><span class="tag">Platform</span></div>
+          <a class="play" href="https://play.google.com/store/apps/details?id=com.air.Mappyjump" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path fill="#3ddc84" d="M4 2.5v19c0 .6.6 1 1.1.7L22 12.9c.5-.3.5-1.1 0-1.4L5.1 1.8C4.6 1.5 4 1.9 4 2.5z"/></svg> Google Play</a>
+        </article>
+        <article class="card">
+          <div class="ic"><img src="https://play-lh.googleusercontent.com/Ur_dApaWMepmvgtmvpddAzYA4qyVqF6Yw0V0wAZf2grwqEYPlCzney3o9S5ETpH3UlzQY8n082blgvRbbKgJkA=s256" alt="Mariyo World" loading="lazy" onerror="this.parentNode.style.background='linear-gradient(135deg,#3ddc84,#3de0ff)';this.replaceWith('MW')"></div>
+          <h3>Mariyo World</h3>
+          <p data-tr>Ayı gökkuşağına taşı! Zorlu bir platform oyunu.</p>
+          <p data-en>Bring the moon to the rainbow! A hard platform game.</p>
+          <div class="tags"><span class="tag star">★ 5.0</span><span class="tag">Platform</span></div>
+          <a class="play" href="https://play.google.com/store/apps/details?id=air.CrazyCrescent" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path fill="#3ddc84" d="M4 2.5v19c0 .6.6 1 1.1.7L22 12.9c.5-.3.5-1.1 0-1.4L5.1 1.8C4.6 1.5 4 1.9 4 2.5z"/></svg> Google Play</a>
+        </article>
+        <article class="card">
+          <div class="ic" style="background:linear-gradient(135deg,#0ea5e9,#22c55e);font-size:38px;font-family:inherit">🐠</div>
+          <h3>Eğitici Balık</h3>
+          <p data-tr>Öğretmenler için sınıf akvaryumu: her öğrenci bir balık, puan aldıkça büyür. Ders sonunda da canavara karşı savaş!</p>
+          <p data-en>A classroom aquarium for teachers: every student is a fish that grows with points — plus an end-of-lesson boss battle!</p>
+          <div class="tags"><span class="tag">Web</span><span class="tag" data-tr>Eğitim</span><span class="tag" data-en>Education</span></div>
+          <a class="play" href="https://cemrebaou.github.io/balik/" target="_blank" rel="noopener">🌐 <span data-tr>Uygulamayı aç</span><span data-en>Open app</span></a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="hakkinda" style="background:var(--bg2)">
+    <div class="wrap about">
+      <div>
+        <h2><span data-tr>Hakkında</span><span data-en>About</span></h2>
+        <p class="sub" data-tr>Jawk, Cemre Başoğlu'nun bağımsız oyun stüdyosudur. Çocukluğumuzun arcade oyunlarından ilham alan, herkesin hemen oynayabileceği oyunlar yapıyoruz; bir yandan da öğretmenler için eğitici uygulamalar geliştiriyoruz.</p>
+        <p class="sub" data-en>Jawk is the independent game studio of Cemre Başoğlu. We make pick-up-and-play games inspired by the arcade classics of our childhood, and educational apps for teachers.</p>
+      </div>
+      <div class="box contact" id="iletisim">
+        <h2 style="font-size:18px;margin-bottom:16px"><span data-tr>İletişim</span><span data-en>Contact</span></h2>
+        <a href="mailto:arturcemre@gmail.com">✉️ arturcemre@gmail.com</a>
+        <a href="https://wa.me/cemrebaou" target="_blank" rel="noopener">💬 WhatsApp</a>
+        <a href="privacy.html">🔒 <span data-tr>Gizlilik Politikası</span><span data-en>Privacy Policy</span></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© <span id="yr"></span> Jawk · Cemre Başoğlu</span>
+    <span><a href="privacy.html"><span data-tr>Gizlilik</span><span data-en>Privacy</span></a><a href="app-ads.txt">app-ads.txt</a></span>
+  </div>
+</footer>
+
+<script>
+  document.getElementById("yr").textContent = new Date().getFullYear();
+  const btn = document.getElementById("lang");
+  const set = l => { document.documentElement.lang = l; btn.textContent = l === "tr" ? "EN" : "TR"; try { localStorage.setItem("lang", l); } catch (e) {} };
+  let l = "tr"; try { l = localStorage.getItem("lang") || (navigator.language.startsWith("tr") ? "tr" : "en"); } catch (e) {}
+  set(l);
+  btn.onclick = () => set(document.documentElement.lang === "tr" ? "en" : "tr");
+</script>
+</body>
+</html>
